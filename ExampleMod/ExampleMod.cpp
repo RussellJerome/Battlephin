@@ -35,7 +35,8 @@ void ExampleMod::DrawImGui()
             if (ImGui::Button(nme.c_str()))
             {
                 //Debugging test
-                //std::cout << "Printing Address: " << (void*)Record->ManagerRefObject.GetRawPointer().Get() << std::endl;
+                std::cout << nme << std::endl;
+                std::cout << "Printing Address: " << (void*)Record->ManagerRefObject.GetRawPointer().Get() << std::endl;
             }
         }
 
@@ -67,28 +68,49 @@ void ExampleMod::DrawImGui()
                     }
 
                     /*
-                    *    This code below is a proof of concept at editing positions of CGameProps. 
+                    *    This code below is a proof of concept at editing positions and scale of CGameProps. 
                     *    It works but has several issues that I really don't give a fuck about solving because I just dont want to deal with the stupid fucking asm I have been staring at.
-                    *    SETTING THE LOCATION DOESNT SEEM TO UPDATE THE PHYSICS OR COMPONENT RESPONSIBLE FOR DISPLAYING A ACTUAL FUCKING MESH HALF THE TIME.
+                    *    SETTING THE LOCATION DOESNT SEEM TO UPDATE THE PHYSICS FOR THE FUCKING MESH HALF THE TIME.
                     *    I WROTE THIS ENTIRE PROGRAM ON A BENDER AND I JUST DONT HAVE THE STRENGTH to do this anymore
                     */
 
                     float loc[3] = { opaquePropPtr->vec3_u50.x.Get(), opaquePropPtr->vec3_u50.y.Get(), opaquePropPtr->vec3_u50.z.Get() };
-                    auto buttonname = ModLabel + "LocoGo";
+                    ImGui::DragFloat3("Location", loc, 0.10);
+                    vec3_u* LocationNew = new vec3_u();
+                    LocationNew->x.Set(loc[0]);
+                    LocationNew->y.Set(loc[1]);
+                    LocationNew->z.Set(loc[2]);
+                    actualProp->SetPosition(LocationNew);
 
-                    //UwU drag me daddy
-                    ImGui::DragFloat3(buttonname.c_str(), loc);
-                    opaquePropPtr->vec3_u50.x.Set(loc[0]);
-                    opaquePropPtr->vec3_u50.y.Set(loc[1]);
-                    opaquePropPtr->vec3_u50.z.Set(loc[2]);
+                    float scale[3] = { opaquePropPtr->ScaleX.Get(), opaquePropPtr->ScaleY.Get(), opaquePropPtr->ScaleZ.Get()};
+                    ImGui::DragFloat3("Scale", scale, 0.10);
+                    actualProp->SetScale(scale[0], scale[1], scale[2]);
+
                     ImGui::TreePop();
                 }
             }
 
 
         }
-
-
     }
+
+    //No repentance?
+    if (ImGui::Button("The Rapture"))
+    {
+        for (size_t i = 0; i < FRD::Cmgr->m_mgrs.GetCount(); i++)
+        {
+            MGRRecord* Record = FRD::Cmgr->m_mgrs.GetIndex<MGRRecord>(i);
+            if (std::string(Record->dictKey.Get()) == "havokphysicsmgr")
+            {
+                DWORD64 ManagerAddy = (DWORD64)Record->ManagerRefObject.Get();
+                ManagerAddy = ManagerAddy + (DWORD64)0x3C; //Offset to m_gravityStrength
+                floatbe* GravityDirection = (floatbe*)ManagerAddy;
+
+                //You will meet god
+                GravityDirection->Set(-20.0f);
+            }
+        }
+    }
+
     ImGui::End();
 }

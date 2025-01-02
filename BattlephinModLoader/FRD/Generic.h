@@ -220,14 +220,36 @@ public:
     floatbe z;
 };
 
+//Hand defind no clue on name
+
+class ObjectInfo
+{
+public:
+    floatbe ScaleX;
+    char Unknown1[16];
+    floatbe ScaleY;
+    char Unknown2[16];
+    floatbe ScaleZ;
+    char Unknown3[4];
+    vec3_u Location;
+    char UnknownLocationEffect[4];
+    char PaddingTo68[4];
+    unsigned int unknownintPerchance;
+};
 
 //I dont have the slightest of a clue what this is exactly but thats okay =)
 struct opaqueProp // sizeof=0x5C
 {
-    byte gap0[4];
-    int32be dword4; //Refrence to prop owner.... maybe
-    byte gap8[72];
-    vec3_u vec3_u50; //The props location or atleast what I think is the location
+    wiiP<ObjectInfo> meshObject;
+    int32be dword4;
+    byte gap8[24];
+    floatbe ScaleX;
+    char Unknown1[16];
+    floatbe ScaleY;
+    char Unknown2[16];
+    floatbe ScaleZ;
+    byte gap4C[4];
+    vec3_u vec3_u50;
 };
 
 struct $1872053F6F063FB8907DA0F24D4F61F9
@@ -268,10 +290,10 @@ public:
     uint32be m_attachments;
     NetPropID m_netid;
     int32be m_tickType;
-    uint32be m_flags;
+    unsigned int m_flags;
 public:
-    //Lets not
     void SetPosition(const vec3_u* pos);
+    void SetScale(float ScaleX, float ScaleY, float ScaleZ);
 };
 
 class __declspec(align(4)) TPropInfo
